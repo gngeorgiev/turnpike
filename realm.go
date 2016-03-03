@@ -87,15 +87,15 @@ func (l *localClient) onLeave(session ID) {
 
 func (r *Realm) handleSession(sess Session) {
 	r.Lock()
-	defer r.Unlock()
 	r.clients[sess.Id] = sess
+	r.Unlock()
 	r.onJoin(sess.Details)
 	defer func() {
 		r.Lock()
-		defer r.Unlock()
 		delete(r.clients, sess.Id)
 		r.Dealer.RemovePeer(sess.Peer)
 		r.onLeave(sess.Id)
+		r.Unlock()
 	}()
 	c := sess.Receive()
 	// TODO: what happens if the realm is closed?
